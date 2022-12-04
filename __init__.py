@@ -23,7 +23,7 @@ bl_info = {
     "name": "BreakPoint",
     "description": "Breakpoint allows you to pause script execution and display variables values.",
     "author": "Christopher Barrett  (www.goodspiritgraphics.com)",
-    "version": (2,0),
+    "version": (2,1),
     "blender": (3, 2, 0),
     "api": 46461,
     "location": "Text Editor > Properties",
@@ -56,7 +56,7 @@ class BreakPoint_Class:
         bpy.types.Scene.gsg1_console_print = BoolProperty(name= "Print to Console", description = "Select to print 'BreakPoint' commands to the 'Console' window." , default = True)
         bpy.types.Scene.gsg1_panel_print = BoolProperty(name= "Print to Panel", description = "Select to print 'BreakPoint' commands to the 'BreakPoint' panel." , default = True)
         bpy.types.Scene.gsg1_log_print = BoolProperty(name= "Print to Log", description = "Select to print 'BreakPoint' commands to the log." , default = False)
-        bpy.types.Scene.gsg1_ignore_pause = BoolProperty(name= "Ignore Pause", description = "Global setting to ignore all 'Pause' args in the 'BreakPoint' commands.  This stops 'BreakPoint' from pausing." , default = False)
+        bpy.types.Scene.gsg1_ignore_pause = BoolProperty(name= "Ignore Pause", description = "Global setting to ignore all 'Pause' args in the 'BreakPoint' commands.  This stops 'BreakPoint' from pausing." , default = True)
         bpy.types.Scene.gsg1_ignore_print = BoolProperty(name= "Ignore Print", description = "Global setting to ignore all 'Prnt' args in the 'BreakPoint' commands.  This stops 'Breakpoint' from printing." , default = False)
         bpy.types.Scene.gsg1_update_panel = BoolProperty(name= "Update Panel", description = "Select to force Blender to update the 'BreakPoint' panel.  Slow, but it guarantees valid display of variable values." , default = True)
         bpy.types.Scene.gsg1_columns = IntProperty(name="Column Width", description = "Sets the number of characters to display on a single line." , min = 25 , max = 200 , default = 50)

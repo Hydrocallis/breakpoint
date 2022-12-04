@@ -23,7 +23,7 @@ bl_info = {
     "name": "BreakPoint",
     "description": "Breakpoint allows you to pause script execution and display variables values.",
     "author": "Christopher Barrett  (www.goodspiritgraphics.com)",
-    "version": (2,1),
+    "version": (2,1,0),
     "blender": (3, 2, 0),
     "api": 46461,
     "location": "Text Editor > Properties",

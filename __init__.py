@@ -22,8 +22,8 @@
 bl_info = {
     "name": "BreakPoint",
     "description": "Breakpoint allows you to pause script execution and display variables values.",
-    "author": "Christopher Barrett  (www.goodspiritgraphics.com)",
-    "version": (2,1,0),
+    "author": "Christopher Barrett  (www.goodspiritgraphics.com),Hydrocallis",
+    "version": (2,1,1),
     "blender": (3, 2, 0),
     "api": 46461,
     "location": "Text Editor > Properties",
@@ -35,7 +35,7 @@ bl_info = {
     "category": "Development"}
 
 
-import bpy
+import bpy,time
 import code
 import traceback
 import textwrap
@@ -43,6 +43,7 @@ from collections import OrderedDict
 from bpy.props import BoolProperty
 from bpy.props import IntProperty
 from bpy.props import EnumProperty
+from bpy.props import StringProperty
 
 
 class BreakPoint_Class:
@@ -55,10 +56,11 @@ class BreakPoint_Class:
  
         bpy.types.Scene.gsg1_console_print = BoolProperty(name= "Print to Console", description = "Select to print 'BreakPoint' commands to the 'Console' window." , default = True)
         bpy.types.Scene.gsg1_panel_print = BoolProperty(name= "Print to Panel", description = "Select to print 'BreakPoint' commands to the 'BreakPoint' panel." , default = True)
-        bpy.types.Scene.gsg1_log_print = BoolProperty(name= "Print to Log", description = "Select to print 'BreakPoint' commands to the log." , default = False)
+        bpy.types.Scene.gsg1_log_print = BoolProperty(name= "Print to Log", description = "Select to print 'BreakPoint' commands to the log." , default = True)
         bpy.types.Scene.gsg1_ignore_pause = BoolProperty(name= "Ignore Pause", description = "Global setting to ignore all 'Pause' args in the 'BreakPoint' commands.  This stops 'BreakPoint' from pausing." , default = True)
         bpy.types.Scene.gsg1_ignore_print = BoolProperty(name= "Ignore Print", description = "Global setting to ignore all 'Prnt' args in the 'BreakPoint' commands.  This stops 'Breakpoint' from printing." , default = False)
         bpy.types.Scene.gsg1_update_panel = BoolProperty(name= "Update Panel", description = "Select to force Blender to update the 'BreakPoint' panel.  Slow, but it guarantees valid display of variable values." , default = True)
+        bpy.types.Scene.gsg1_update_panel_mode = BoolProperty(name= "Mode", description = "" , default = True)
         bpy.types.Scene.gsg1_columns = IntProperty(name="Column Width", description = "Sets the number of characters to display on a single line." , min = 25 , max = 200 , default = 50)
         bpy.types.Scene.gsg1_display_help = BoolProperty(name= "Display Help", description = "Display 'BreakPoint' help info." , default = False)
         bpy.types.Scene.gsg1_double_space = BoolProperty(name= "Double Space", description = "Double-space lines between variables in both the 'BreakPoint_log' file, and in the console." , default = False)
@@ -102,8 +104,9 @@ class BP_PT_bp(bpy.types.Panel):
         row = layout.row()
 
         row = layout.row()
-        row.prop(context.scene , "gsg1_update_panel")
-        row.label(text="")
+        updatepanelbox= row.box()
+        updatepanelbox.prop(context.scene , "gsg1_update_panel")
+        updatepanelbox.prop(context.scene , "gsg1_update_panel_mode")
         row.operator("gsg1.clear_log")
 
         row = layout.row()
@@ -128,6 +131,8 @@ class BP_PT_bp(bpy.types.Panel):
 
         row = layout.row()
         row = layout.row()
+        row.operator("gsg1.insert",text="Insert Method").cmd = "method"
+        row.operator("gsg1.insert",text="Insert Breakpoint").cmd = "breakpoint"
 
 
         if scn.gsg1_display_help:
@@ -296,6 +301,34 @@ class BP_OT_ClearLog(bpy.types.Operator):
         return {'FINISHED'}
 
 	
+		
+class BP_OT_INSERT(bpy.types.Operator):
+    bl_idname = "gsg1.insert"
+    bl_label = "Insert Breakpoit"
+    bl_description = "script insert breakpoit"
+    
+    cmd : StringProperty(
+        default="",
+        options={'HIDDEN'}
+        )
+    @classmethod
+    def poll(self, context):
+        if bpy.data.texts.items() != []:
+            return True
+        else:
+            return False
+
+
+    def execute(self, context):
+        if self.cmd == "method":
+            inserttext= "breakpoint = bpy.types.BP_PT_bp.bp"
+        elif self.cmd == "breakpoint":
+            inserttext = "breakpoint(locals(),False,True) # breakpoint(Variables, console Pause Condition, Print Condition)" 
+        bpy.ops.text.insert(text=inserttext)
+
+        return {'FINISHED'}
+
+	
 
 		
 def prepare_to_log():
@@ -359,18 +392,26 @@ def print_to_console_wrap(list):
 
 		
 def force_redraw():
+
     if bpy.context.scene.gsg1_update_panel:
-        bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
+        if bpy.context.scene.gsg1_update_panel_mode == True: 
+            for ar in bpy.context.screen.areas:
+                if ar.type=="TEXT_EDITOR":
+                    ar.tag_redraw()
+        else:       
+            bpy.ops.wm.redraw_timer(type='DRAW_WIN_SWAP', iterations=1)
 
 
 #registration is necessary for the script to appear in the GUI
 def register():
     bpy.utils.register_class(BP_PT_bp)
     bpy.utils.register_class(BP_OT_ClearLog)
+    bpy.utils.register_class(BP_OT_INSERT)
 
 def unregister():
     bpy.utils.unregister_class(BP_PT_bp)
     bpy.utils.unregister_class(BP_OT_ClearLog)
+    bpy.utils.unregister_class(BP_OT_INSERT)
 
 if __name__ == '__main__':
     register()
